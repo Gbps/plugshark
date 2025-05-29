@@ -12,16 +12,19 @@ macro_rules! cstr {
 
 // Plugin version string
 #[no_mangle]
+#[allow(non_upper_case_globals)]
 #[used]
-pub static plugin_version: &'static CStr = unsafe { CStr::from_ptr(cstr!("1.0.0")) };
+pub static plugin_version: [u8; 6] = [b'1', b'.', b'0', b'.', b'0', b'\0'];
 
 // Major version of Wireshark that the plugin is built for
 #[no_mangle]
+#[allow(non_upper_case_globals)]
 #[used]
 pub static plugin_want_major: c_int = 4;
 
 // Minor version of Wireshark that the plugin is built for
 #[no_mangle]
+#[allow(non_upper_case_globals)]
 #[used]
 pub static plugin_want_minor: c_int = 4;
 
