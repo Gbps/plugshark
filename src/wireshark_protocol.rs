@@ -153,6 +153,9 @@ pub struct WiresharkFieldArgs<'a> {
     // The way to display the field when rendered
     display: FieldDisplayType,
 
+    // The bitmask to apply to the field
+    bitmask: u64,
+
     // A list of value names to display next to the field. The dissector will
     // check all values in the vec and display the string value of one that matches.
     str_values: Option<Vec<WiresharkFieldValueString<'a>>>,
@@ -166,6 +169,7 @@ impl<'a> WiresharkFieldArgs<'a> {
             name: name,
             field_type: FieldType::None,
             display: FieldDisplayType::BaseNone,
+            bitmask: 0x0,
             str_values: None,
         }
     }
@@ -178,6 +182,12 @@ impl<'a> WiresharkFieldArgs<'a> {
     // Add a display type to the field definition
     pub fn with_display(mut self, display: FieldDisplayType) -> Self {
         self.display = display;
+        self
+    }
+
+    // Add a bitmask to the field definition
+    pub fn with_bitmask(mut self, bitmask: u64) -> Self {
+        self.bitmask = bitmask;
         self
     }
 
@@ -194,6 +204,7 @@ struct WiresharkFieldDefinition {
     name: String,
     field_type: FieldType,
     display: FieldDisplayType,
+    bitmask: u64,
     str_values: Option<Vec<WiresharkFieldValueStringOwned>>,
 }
 
@@ -238,6 +249,7 @@ impl WiresharkProtocolDefinition {
             name: definition.name.to_string(),
             field_type: definition.field_type,
             display: definition.display,
+            bitmask: definition.bitmask,
             str_values: str_values,
         });
     }
@@ -366,6 +378,7 @@ impl WiresharkProtocol {
         type_: FieldType,
         values: &Option<Vec<WiresharkFieldValueStringOwned>>,
         display: FieldDisplayType,
+        bitmask: u64,
     ) {
         let mut values_ptr: *const _value_string = null();
 
@@ -389,7 +402,7 @@ impl WiresharkProtocol {
                 type_: type_.to_u32(),
                 display: display.to_i32(),
                 strings: values_ptr as *const c_void,
-                bitmask: 0x0,
+                bitmask: bitmask,
                 blurb: null(),
                 id: -1,
                 parent: 0,
@@ -935,6 +948,7 @@ pub unsafe extern "C" fn proto_register_foo() {
                 field.field_type,
                 &field.str_values,
                 field.display,
+                field.bitmask,
             );
         }
 
